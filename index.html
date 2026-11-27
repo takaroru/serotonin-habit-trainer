@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#246b55">
+<meta name="description" content="セロトニンに関係する生活習慣を30日間記録するトレーナー">
+<link rel="manifest" href="manifest.webmanifest">
+<title>セロトニン習慣トレーナー</title>
+<style>
+:root{--green:#246b55;--pale:#eaf4ef;--ink:#20332b;--muted:#687970;--line:#dce7e1;--bg:#f5f8f6}
+*{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Noto Sans JP",sans-serif;padding-bottom:calc(24px + env(safe-area-inset-bottom))}
+header{background:var(--green);color:white;padding:22px 18px 26px;border-radius:0 0 24px 24px}
+header .eyebrow{font-size:12px;opacity:.85;letter-spacing:.08em} h1{font-size:23px;margin:7px 0} header p{font-size:13px;margin:0;opacity:.9}
+main{max-width:680px;margin:0 auto;padding:14px}
+.card{background:white;border:1px solid var(--line);border-radius:17px;padding:16px;margin:12px 0;box-shadow:0 2px 8px #193d2b08}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px}
+h2{font-size:17px;margin:0 0 12px} h3{font-size:14px;margin:15px 0 8px}
+.small{font-size:12px;color:var(--muted)} .big{font-size:30px;font-weight:750;color:var(--green)}
+.progress{height:10px;background:#e8efeb;border-radius:99px;overflow:hidden;margin:9px 0}.bar{height:100%;background:#2b9b70;width:0%;transition:width .2s}
+.task{display:flex;gap:12px;align-items:flex-start;padding:12px 0;border-bottom:1px solid #edf1ee}.task:last-child{border:0}
+.task input{width:22px;height:22px;accent-color:var(--green);margin:1px 0 0;flex-shrink:0}
+.task strong{font-size:14px;display:block}.task span{font-size:12px;color:var(--muted);display:block;margin-top:3px}
+select,textarea,input[type=date]{font:inherit;border:1px solid var(--line);border-radius:10px;padding:10px;background:white;color:var(--ink);width:100%}
+textarea{min-height:82px;resize:vertical}
+label.field{display:block;font-size:13px;font-weight:650;margin:12px 0 6px}
+button{font:inherit;border:0;border-radius:12px;padding:12px 15px;background:var(--green);color:white;font-weight:700;cursor:pointer}
+button.secondary{background:var(--pale);color:var(--green)}button.danger{background:#fff0ee;color:#a43c32}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.actions button{flex:1}
+.days{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}.day{border:1px solid var(--line);border-radius:9px;text-align:center;padding:8px 2px;font-size:11px;background:white}.day.done{background:var(--pale);border-color:#a8cfba;color:var(--green);font-weight:700}
+svg{width:100%;height:auto;display:block}.notice{background:#fff8e7;border:1px solid #f0dfb2;padding:11px;border-radius:12px;font-size:12px;line-height:1.6;color:#685329}
+footer{text-align:center;color:var(--muted);font-size:11px;padding:18px}
+</style>
+</head>
+<body>
+<header><div class="eyebrow">30-DAY WELLNESS CHALLENGE</div><h1>セロトニン習慣トレーナー</h1><p>毎日の小さな習慣を、無理なく積み重ねよう。</p></header>
+<main>
+<section class="card">
+ <div class="row"><div><div class="small" id="todayLabel"></div><h2 style="margin:4px 0 0">今日のトレーニング</h2></div><div class="big" id="percent">0%</div></div>
+ <div class="progress"><div class="bar" id="bar"></div></div>
+ <div class="row small"><span id="count">0 / 8 項目達成</span><span id="dayCount">チャレンジ 1日目</span></div>
+</section>
+<section class="card">
+ <div class="row"><h2>今日のチェックリスト</h2><input type="date" id="datePick" style="width:auto;max-width:150px"></div>
+ <div id="tasks"></div>
+ <div class="notice" style="margin-top:12px">運動は主治医から許可された範囲で行ってください。胸部大動脈瘤がある場合、息を止める動作・強い力み・高強度運動は避け、運動強度は主治医の指示を優先してください。</div>
+</section>
+<section class="card">
+ <h2>今日のコンディション</h2>
+ <label class="field" for="mood">気分</label><select id="mood"><option>良好</option><option selected>普通</option><option>不調</option></select>
+ <label class="field" for="energy">活力</label><select id="energy"><option>高い</option><option selected>普通</option><option>低い</option></select>
+ <label class="field" for="note">今日の気づき・感想</label><textarea id="note" placeholder="気分、睡眠、身体の調子、気づいたことなど"></textarea>
+ <div class="actions"><button id="save">今日の記録を保存</button><button class="secondary" id="clear">チェックをクリア</button></div>
+ <p class="small" id="savedMsg" aria-live="polite"></p>
+</section>
+<section class="card">
+ <h2>30日間の記録</h2><div class="days" id="calendar"></div>
+ <h3>達成率の推移</h3><svg id="chart" viewBox="0 0 320 130" role="img" aria-label="直近30日間の達成率グラフ"></svg>
+ <div class="row small"><span>記録日数：<b id="recordDays">0日</b></span><span>平均達成率：<b id="average">—</b></span></div>
+ <div class="actions"><button class="secondary" id="export">記録をバックアップ</button><button class="secondary" id="importBtn">バックアップを読み込む</button><input id="fileInput" type="file" accept="application/json" hidden></div>
+ <p class="small">記録はこのブラウザ内に保存されます。ブラウザのデータ削除や端末変更に備え、定期的にバックアップしてください。</p>
+</section>
+<section class="card">
+ <h2>30日間の目標</h2>
+ <p class="small">達成率だけを追いかけず、続けやすい習慣を見つけることが目的です。できない日があっても、翌日から再開すれば大丈夫。</p>
+ <div class="row"><span>1週目：基本習慣</span><span class="small">光・歩行・睡眠</span></div><div class="row"><span>2週目：リズムづくり</span><span class="small">運動・呼吸・休息</span></div><div class="row"><span>3週目：食事と腸内環境</span><span class="small">タンパク質・食物繊維</span></div><div class="row"><span>4週目：振り返り</span><span class="small">気分・活力・継続</span></div>
+</section>
+</main><footer>セロトニン習慣トレーナー · 個人用セルフケア記録</footer>
+<script>
+const tasks=[
+ ["朝の太陽光","屋外で15〜20分、自然光を浴びる"],
+ ["リズム運動","許可された強度で、無理なく身体を動かす"],
+ ["タンパク質を摂る","卵・ヨーグルト・大豆・魚・鶏肉など"],
+ ["人との交流","家族や仲間との会話を楽しむ"],
+ ["創造的な活動","学習、DIY、企画などに取り組む"],
+ ["軽いストレッチ","痛みや息こらえのない範囲で身体をほぐす"],
+ ["リラックス","入浴やゆっくりした呼吸で落ち着く"],
+ ["睡眠リズム","起床・就寝時刻を整え、十分な睡眠をとる"]
+];
+const KEY="serotonin-habit-v1";let records=JSON.parse(localStorage.getItem(KEY)||"{}");
+const $=id=>document.getElementById(id);
+const today=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`};
+$("datePick").value=today();
+function render(){
+ const date=$("datePick").value||today(),r=records[date]||{done:[],mood:"普通",energy:"普通",note:""};
+ $("todayLabel").textContent=new Date(date+"T00:00:00").toLocaleDateString("ja-JP",{year:"numeric",month:"long",day:"numeric",weekday:"short"});
+ $("tasks").innerHTML=tasks.map((t,i)=>`<label class="task"><input type="checkbox" data-i="${i}" ${r.done.includes(i)?"checked":""}><span><strong>${t[0]}</strong><span>${t[1]}</span></span></label>`).join("");
+ document.querySelectorAll("#tasks input").forEach(x=>x.addEventListener("change",()=>{const a=[...document.querySelectorAll("#tasks input:checked")].map(c=>+c.dataset.i);r.done=a;records[date]=r;save(false);updateProgress(a.length);}));
+ $("mood").value=r.mood;$("energy").value=r.energy;$("note").value=r.note||"";
+ updateProgress(r.done.length);drawHistory();
+}
+function updateProgress(n){let p=Math.round(n/8*100);$("percent").textContent=p+"%";$("bar").style.width=p+"%";$("count").textContent=n+" / 8 項目達成";}
+function save(show=true){localStorage.setItem(KEY,JSON.stringify(records));if(show)$("savedMsg").textContent="保存しました。次回もこの端末のブラウザから確認できます。";drawHistory();}
+$("save").onclick=()=>{let date=$("datePick").value,r=records[date]||{done:[]};r.mood=$("mood").value;r.energy=$("energy").value;r.note=$("note").value;r.done=[...document.querySelectorAll("#tasks input:checked")].map(c=>+c.dataset.i);records[date]=r;save();updateProgress(r.done.length);};
+$("clear").onclick=()=>{if(!confirm("今日のチェックと記録をクリアしますか？"))return;records[$("datePick").value]={done:[],mood:"普通",energy:"普通",note:""};save();render();};
+$("datePick").onchange=render;
+function drawHistory(){
+ let dates=Object.keys(records).sort().slice(-30), vals=dates.map(d=>Math.round((records[d].done||[]).length/8*100));
+ $("recordDays").textContent=dates.length+"日";$("average").textContent=vals.length?Math.round(vals.reduce((a,b)=>a+b,0)/vals.length)+"%":"—";
+ let start=new Date();start.setDate(start.getDate()-29);let cells="";
+ for(let i=0;i<30;i++){let d=new Date(start);d.setDate(start.getDate()+i);let k=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`,r=records[k],n=r?(r.done||[]).length:0;cells+=`<div class="day ${n===8?"done":""}" title="${k}: ${Math.round(n/8*100)}%">${d.getMonth()+1}/${d.getDate()}<br>${r?Math.round(n/8*100)+"%":"—"}</div>`;}
+ $("calendar").innerHTML=cells;
+ let points=dates.map((d,i)=>`${10+i*(300/Math.max(1,dates.length-1))},${112-(vals[i]*.95)}`).join(" ");
+ $("chart").innerHTML=`<line x1="10" y1="112" x2="310" y2="112" stroke="#dce7e1"/><line x1="10" y1="17" x2="310" y2="17" stroke="#edf1ee"/><text x="2" y="20" font-size="9" fill="#687970">100</text><text x="5" y="115" font-size="9" fill="#687970">0</text>${dates.length?`<polyline points="${points}" fill="none" stroke="#2b9b70" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>`:"<text x='160' y='65' text-anchor='middle' font-size='11' fill='#687970'>記録するとグラフが表示されます</text>"}`;
+ let first=Object.keys(records).sort()[0];let elapsed=first?Math.max(1,Math.floor((new Date(today())-new Date(first))/86400000)+1):1;$("dayCount").textContent="チャレンジ "+Math.min(30,elapsed)+"日目";
+}
+$("export").onclick=()=>{let blob=new Blob([JSON.stringify(records,null,2)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="serotonin-records.json";a.click();URL.revokeObjectURL(a.href);};
+$("importBtn").onclick=()=>$("fileInput").click();
+$("fileInput").onchange=async e=>{try{let data=JSON.parse(await e.target.files[0].text());if(!data||typeof data!=="object")throw 0;if(confirm("現在の記録にバックアップ内容を追加・上書きしますか？")){records={...records,...data};save();render();}}catch{alert("読み込めるバックアップファイルではありません。")};e.target.value="";};
+if("serviceWorker" in navigator && location.protocol.startsWith("http"))navigator.serviceWorker.register("./sw.js").catch(()=>{});
+render();
+</script>
+</body></html>
