@@ -1,0 +1,9 @@
+{
+  "name": "セロトニン習慣トレーナー",
+  "short_name": "習慣トレーナー",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f5f8f6",
+  "theme_color": "#246b55",
+  "icons": []
+}
